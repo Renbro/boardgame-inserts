@@ -8,7 +8,7 @@ CardHeight = 96;
 BoxHeight = 98; 
 
 // Size of each Card slot
-Slots = [18, 34, 50, 35];
+Slots = [19, 34, 50, 35];
 
 // Number of rows of cards
 Rows = 1;
@@ -24,7 +24,7 @@ Removal = 0.4;
 AccessDepth = 0.4;
 
 // Wall Thickness
-gWT = 1.6;
+gWT = 1;
 
 // Roundness
 $fn = 20;

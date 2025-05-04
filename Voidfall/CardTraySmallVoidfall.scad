@@ -1,14 +1,14 @@
 // Width of a single card
-CardWidth = 61;    
+CardWidth = 73;    
 
 // Height of a single card
-CardHeight = 96;  
+CardHeight = 48;  
 
 // Box Height
-BoxHeight = 98; 
+BoxHeight = 35; 
 
 // Size of each Card slot
-Slots = [50, 50, 40];
+Slots = [34, 21, 17, 11, 19, 41];
 
 // Number of rows of cards
 Rows = 1;
@@ -17,14 +17,14 @@ Rows = 1;
 SlantFront = true;
 
 // Labels for each card slot  (only recommended when Rows=1)
-Labels = ["Encounters", "Rewards", "Misc"];
+Labels = ["Tech", "Agenda", "Alert", "Fallen", "House", "Crisis"];
 
 // Size of botton cutout, % of width
-Removal = 0.4;
-AccessDepth = 0.4;
+Removal = 0.25;
+AccessDepth = 0.25;
 
 // Wall Thickness
-gWT = 1;
+gWT = 1.6;
 
 // Roundness
 $fn = 20;
