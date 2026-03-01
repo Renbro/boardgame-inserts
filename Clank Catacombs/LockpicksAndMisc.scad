@@ -3,10 +3,10 @@ $fn=30;
 /* [Global] */
 
 // Render
-Objects = "Box"; //  [Both, Box, Lid]
+Objects = "Lid"; //  [Both, Box, Lid]
 
 // use the following syntax to add 1 or more internal x compartment lengths (mm)
-x_sizes = [40, 60];
+x_sizes = [40, 80];
 // use the following syntax to add 1 or more internal y compartment widths (mm)
 y_sizes = [60];
 // Total height including Lid
