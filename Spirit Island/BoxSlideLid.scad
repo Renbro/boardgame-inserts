@@ -3,14 +3,14 @@ $fn=30;
 /* [Global] */
 
 // Render
-Objects = "Box"; //  [Both, Box, Lid]
+Objects = "Lid"; //  [Both, Box, Lid]
 
 // use the following syntax to add 1 or more internal x compartment lengths (mm)
-x_sizes = [35, 30, 45, 40, 25, 46];
+x_sizes = [25, 25, 40, 40, 60];
 // use the following syntax to add 1 or more internal y compartment widths (mm)
-y_sizes = [44];
+y_sizes = [40, 40, 40, 40];
 // Total height including Lid
-z_size = 28;
+z_size = 25;
 
 // Type of lid pattern
 gPattern = "Fancy"; //  [Hex, Diamond, Web, Solid, Fancy]
@@ -19,7 +19,7 @@ gTol = 0.3;
 // Wall Thickness
 gWT = 1.2;
 // Curvature bottom
-ipR = 8;
+ipR = 12;
 
 /* [Spider Web] */
 // Amount of space from one ring or webs to the next
