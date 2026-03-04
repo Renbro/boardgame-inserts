@@ -3,13 +3,13 @@ $fn=30;
 /* [Global] */
 
 // Render
-Objects = "Lid"; //  [Both, Box, Lid]
+Objects = "LidlessBox"; // [Both, Box, Lid, LidlessBox]
 
 // use the following syntax to add 1 or more internal x compartment lengths (mm)
 x_sizes = [60, 60, 60, 60];
 // use the following syntax to add 1 or more internal y compartment widths (mm)
 y_sizes = [60, 40];
-// Total height including Lid
+// Total height including Lid (If Lidless, this is the final height)
 z_size = 25;
 
 // Type of lid pattern
@@ -35,6 +35,9 @@ WebWedges = 12;
 /* [Hidden] */
 /* Private variables */
 
+// Check if we are in Lidless mode
+isLidless = (Objects == "LidlessBox");
+
 // Box Height
 TotalZ = z_size;
 LidH = 2.2;
@@ -42,15 +45,19 @@ RailThick = 1.4;
 RailWidth = LidH + RailThick;
 
 function SumList(list, start, end) = (start == end) ? 0 : list[start] + SumList(list, start+1, end);
+
 // Box Length
 TotalX = SumList(x_sizes,0,len(x_sizes)) + gWT*(len(x_sizes)+1);
-// Box Width 
-TotalY = SumList(y_sizes,0,len(y_sizes)) + RailWidth*2 + gWT*(len(y_sizes)-1);
+
+// Box Width - If lidless, we don't need the extra width for the sliding rails
+TotalY = isLidless ? 
+    SumList(y_sizes,0,len(y_sizes)) + gWT*(len(y_sizes)+1) : 
+    SumList(y_sizes,0,len(y_sizes)) + RailWidth*2 + gWT*(len(y_sizes)-1);
 
 echo("Size: ",TotalX,TotalY);
-   
-// Height not counting the lid
-AdjBoxHeight = TotalZ - LidH;
+    
+// Height not counting the lid. If lidless, height is the full z_size.
+AdjBoxHeight = isLidless ? TotalZ : TotalZ - LidH;
 
  module regular_polygon(order, r=1){
  	angles=[ for (i = [0:order-1]) i*(360/order) ];
@@ -79,7 +86,7 @@ module circle_lattice(ipX, ipY, Spacing=10, Walls=1.2)  {
 
 module diamond_lattice(ipX, ipY, DSize, WSize)  {
 
-    lOffset = DSize + WSize;
+   lOffset = DSize + WSize;
 
 	difference()  {
 		square([ipX, ipY]);
@@ -164,13 +171,13 @@ module lid(ipPattern = "Hex", ipTol = 0.3){
   lFingerY = 16;  
 
   // main square with center removed for a pattern. 0.01 addition is a kludge to avoid a 2d surface remainging when substracting the lid from the box.
-         difference() {
+  difference() {
       translate([0,0,lAdjZ/2]) cube([lAdjX+0.01, lAdjY+0.01 , lAdjZ], center=true);
 
       translate([0,0,lAdjZ/2]) cube([CutX, CutY, lAdjZ], center = true);
       translate([TotalX/2-gWT/2,0,LidH/2])cube([gWT+0.01,TotalY-RailWidth,LidH],center=true);
 
-     // make a slot for the latch can flex         
+     // make a slot for the latch can flex          
      translate([TotalX/2,TotalY/2-RailWidth-1.4,-1]) RCube(18,0.8,4,0.4);
      translate([TotalX/2,-TotalY/2+RailWidth+1.4,-1]) RCube(18,0.8,4,0.4);
   }
@@ -214,8 +221,8 @@ module lid(ipPattern = "Hex", ipTol = 0.3){
   if (ipPattern == "Solid") 
       {   
        difference (){ 
-         translate([-CutX/2,-CutY/2,0]) cube([CutX, CutY,   lAdjZ]);
-         translate([-CutX/2,-lFingerY/2,0]) cube([lFingerX, lFingerY, lAdjZ]); 
+          translate([-CutX/2,-CutY/2,0]) cube([CutX, CutY,   lAdjZ]);
+          translate([-CutX/2,-lFingerY/2,0]) cube([lFingerX, lFingerY, lAdjZ]); 
       }
     }
     
@@ -229,7 +236,7 @@ module lid(ipPattern = "Hex", ipTol = 0.3){
              linear_extrude(height = lAdjZ) spider_web(WebSpacing, WebStrands, WedThickness, WebWedges);  
               translate([-CutX/2,-CutY/2,0]) cube([CutX, CutY, LidH*2]); 
         }
-         translate([-CutX/2,-lFingerY/2,0]) cube([lFingerX, lFingerY, lAdjZ]); 
+          translate([-CutX/2,-lFingerY/2,0]) cube([lFingerX, lFingerY, lAdjZ]); 
       }
     }
 
@@ -237,8 +244,8 @@ module lid(ipPattern = "Hex", ipTol = 0.3){
   if (ipPattern == "Hex") 
     {   
        difference (){ 
-         translate([-CutX/2,-CutY/2,0]) linear_extrude(height = lAdjZ) hex_lattice(CutX,CutY,6,2);
-         translate([-CutX/2,-lFingerY/2,0]) cube([lFingerX, lFingerY, lAdjZ]); 
+          translate([-CutX/2,-CutY/2,0]) linear_extrude(height = lAdjZ) hex_lattice(CutX,CutY,6,2);
+          translate([-CutX/2,-lFingerY/2,0]) cube([lFingerX, lFingerY, lAdjZ]); 
       }
     }
 
@@ -254,7 +261,7 @@ module lid(ipPattern = "Hex", ipTol = 0.3){
   // fancy top
   if (ipPattern == "Fancy") 
     {
-        echo(CutX,CutY);
+       echo(CutX,CutY);
       difference (){ 
         translate([-CutX/2,-CutY/2,0]) linear_extrude(height = lAdjZ) circle_lattice(CutX,CutY);
         translate([-CutX/2,-lFingerY/2,0]) cube([lFingerX, lFingerY, lAdjZ]); 
@@ -274,52 +281,57 @@ module box () {
     {
       for(nY=[0:len(y_sizes)-1])
       {
-         xOffset = SumList(x_sizes,0,nX) + gWT*(nX+1) + x_sizes[nX]/2 - TotalX/2;
-         yOffset = SumList(y_sizes,0,nY) + RailWidth + gWT*nY + y_sizes[nY]/2 - TotalY/2;
+          xOffset = SumList(x_sizes,0,nX) + gWT*(nX+1) + x_sizes[nX]/2 - TotalX/2;
           
-         translate([xOffset,yOffset,gWT]) RCube(x_sizes[nX], y_sizes[nY] ,AdjBoxHeight+20);
+          // If lidless, we start from a standard wall thickness. If lidded, we start from RailWidth.
+          yStart = isLidless ? gWT : RailWidth;
+          yOffset = SumList(y_sizes,0,nY) + yStart + gWT*nY + y_sizes[nY]/2 - TotalY/2;
+          
+          translate([xOffset,yOffset,gWT]) RCube(x_sizes[nX], y_sizes[nY] ,AdjBoxHeight+20);
       }
     }
   }
 
-  // top rails
-  difference() {
-      union() {
-          translate([0,-TotalY/2+RailWidth/2,AdjBoxHeight+LidH/2]) cube([TotalX,RailWidth,LidH],center = true);  
-          translate([0,TotalY/2-RailWidth/2,AdjBoxHeight+LidH/2]) cube([TotalX,RailWidth,LidH],center = true);
-           }
-       
-      // Trim each rail top to a 45 degree angle     
-      translate([0,-TotalY/2,AdjBoxHeight+RailWidth]) rotate([45,0,0]) cube([TotalX,RailWidth+0.7,RailWidth+0.7], center=true); 
-      translate([0,TotalY/2,AdjBoxHeight+RailWidth])  rotate([45,0,0]) cube([TotalX,RailWidth+0.7,RailWidth+0.7], center=true);  
+  // Only render rails, backstops, and latches if NOT LidlessBox
+  if (!isLidless) {
+      // top rails
+      difference() {
+         union() {
+              translate([0,-TotalY/2+RailWidth/2,AdjBoxHeight+LidH/2]) cube([TotalX,RailWidth,LidH],center = true);  
+              translate([0,TotalY/2-RailWidth/2,AdjBoxHeight+LidH/2]) cube([TotalX,RailWidth,LidH],center = true);
+               }
+           
+          // Trim each rail top to a 45 degree angle     
+          translate([0,-TotalY/2,AdjBoxHeight+RailWidth]) rotate([45,0,0]) cube([TotalX,RailWidth+0.7,RailWidth+0.7], center=true); 
+          translate([0,TotalY/2,AdjBoxHeight+RailWidth])  rotate([45,0,0]) cube([TotalX,RailWidth+0.7,RailWidth+0.7], center=true);  
 
-      // Substract the lid from the rails
-      translate([0,0,AdjBoxHeight]) lid(ipPattern = "Solid",ipTol =0);      
-  }  
-  
-   // add backstop
-   translate([TotalX/2-1/2,0,TotalZ-LidH/2])cube([1,TotalY-RailWidth,LidH],center=true);
-  
-  // create the latches 
-    translate([TotalX/2-7,TotalY/2-0.1-RailWidth/2,TotalZ-LidH/2]) scale([1.5,1,1]) difference(){
-      rotate([0,0,45]) cube ([2,2,LidH+1],center=true);
-      translate([0,2,0]) cube ([4,4,LidH+2],center=true);
-      translate([0,-2,0])cube([2,2,LidH+2], center=true);
+          // Substract the lid from the rails
+          translate([0,0,AdjBoxHeight]) lid(ipPattern = "Solid",ipTol =0);      
       }  
-    translate([TotalX/2-7,-TotalY/2+0.1+RailWidth/2,TotalZ-LidH/2]) scale([1.5,1,1]) difference(){
-      rotate([0,0,45]) cube ([2,2,LidH+1],center=true);
-      translate([0,-2,0]) cube ([4,4,LidH+2],center=true);
-      translate([0,2,0])cube([2,2,LidH+2], center=true);
-      }
-
-  
+      
+       // add backstop
+       translate([TotalX/2-1/2,0,TotalZ-LidH/2])cube([1,TotalY-RailWidth,LidH],center=true);
+      
+      // create the latches 
+        translate([TotalX/2-7,TotalY/2-0.1-RailWidth/2,TotalZ-LidH/2]) scale([1.5,1,1]) difference(){
+          rotate([0,0,45]) cube ([2,2,LidH+1],center=true);
+          translate([0,2,0]) cube ([4,4,LidH+2],center=true);
+          translate([0,-2,0])cube([2,2,LidH+2], center=true);
+          }  
+        translate([TotalX/2-7,-TotalY/2+0.1+RailWidth/2,TotalZ-LidH/2]) scale([1.5,1,1]) difference(){
+          rotate([0,0,45]) cube ([2,2,LidH+1],center=true);
+          translate([0,-2,0]) cube ([4,4,LidH+2],center=true);
+          translate([0,2,0])cube([2,2,LidH+2], center=true);
+          }
+  }
 } 
 
 // Production Box
-if ((Objects == "Both") || (Objects == "Box")){
+if ((Objects == "Both") || (Objects == "Box") || (Objects == "LidlessBox")){
   intersection() {
      box();
-     RCube(TotalX,TotalY,TotalZ,1);
+     // Final container curvature cut
+     RCube(TotalX,TotalY,AdjBoxHeight + (isLidless ? 0 : LidH),1);
   }
 }
 
@@ -327,5 +339,3 @@ if ((Objects == "Both") || (Objects == "Box")){
 if ((Objects == "Both")  || (Objects == "Lid")){
   translate([-TotalX - 10,0,0]) lid(ipPattern = gPattern, ipTol = gTol);
 }
-
-
