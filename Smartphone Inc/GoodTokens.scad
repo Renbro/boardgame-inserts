@@ -6,7 +6,7 @@ $fn=30;
 Objects = "LidlessBox"; // [Both, Box, Lid, LidlessBox]
 
 // use the following syntax to add 1 or more internal x compartment lengths (mm)
-x_sizes = [114.8];
+x_sizes = [162.6];
 // use the following syntax to add 1 or more internal y compartment widths (mm)
 y_sizes = [21.8];
 // Total height including Lid (If Lidless, this is the final height)
