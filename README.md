@@ -1,4 +1,4 @@
-For most of these I just used some excellent parameterized models by Sislar, all credits should go there. I did do some tweaking.
+For most of the earlier models I just used some excellent parameterized models by Sislar, all credits should go there. I did do some tweaking, mostly using Gemini.
 
 BoxSlideLid:
 https://www.printables.com/model/142790-parameterized-box-v2-wlatching-lid
